@@ -51,6 +51,47 @@ func (q *Queries) CreateSite(ctx context.Context, arg CreateSiteParams) (Site, e
 	return i, err
 }
 
+const getAllPublishedSites = `-- name: GetAllPublishedSites :many
+SELECT id, slug, business_name, business_description, updated_at
+FROM sites
+WHERE published = true
+ORDER BY updated_at DESC
+`
+
+type GetAllPublishedSitesRow struct {
+	ID                  pgtype.UUID        `json:"id"`
+	Slug                string             `json:"slug"`
+	BusinessName        string             `json:"business_name"`
+	BusinessDescription string             `json:"business_description"`
+	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
+}
+
+func (q *Queries) GetAllPublishedSites(ctx context.Context) ([]GetAllPublishedSitesRow, error) {
+	rows, err := q.db.Query(ctx, getAllPublishedSites)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllPublishedSitesRow
+	for rows.Next() {
+		var i GetAllPublishedSitesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Slug,
+			&i.BusinessName,
+			&i.BusinessDescription,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getSiteBySlug = `-- name: GetSiteBySlug :one
 SELECT id, user_id, slug, business_name, business_description, color_palette, html_content, published, custom_domain, generation_count, created_at, updated_at FROM sites WHERE slug = $1
 `

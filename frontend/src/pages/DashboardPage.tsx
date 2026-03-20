@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import {
   Zap, Globe, Sparkles, LogOut, LayoutDashboard,
-  ExternalLink, RefreshCw, Eye, EyeOff, Copy, Check
+  ExternalLink, RefreshCw, Eye, EyeOff, Copy, Check,
+  Search, FileText, Bot, Link2
 } from 'lucide-react'
 import CreateSitePage from './CreateSitePage'
 import LogoPage from './LogoPage'
@@ -348,7 +349,7 @@ function SiteManagement({
       )}
 
       {/* Preview */}
-      <div className="rounded-2xl overflow-hidden border-2 border-gray-200 shadow-lg">
+      <div className="rounded-2xl overflow-hidden border-2 border-gray-200 shadow-lg mb-6">
         <div className="bg-gray-100 px-4 py-3 flex items-center gap-3 border-b border-gray-200">
           <div className="flex gap-1.5">
             <div className="w-3 h-3 rounded-full bg-red-400" />
@@ -371,6 +372,99 @@ function SiteManagement({
             title="Preview do site"
           />
         )}
+      </div>
+
+      {/* SEO Status */}
+      <SEOStatus site={site} />
+    </div>
+  )
+}
+
+// ---- SEO Status Card ----
+function SEOStatus({ site }: { site: Site }) {
+  const origin = window.location.origin
+
+  const checks = [
+    {
+      icon: Search,
+      label: 'Meta tags SEO',
+      description: 'title, description, Open Graph',
+      ok: true,
+      color: 'text-green-600',
+      bg: 'bg-green-50',
+    },
+    {
+      icon: FileText,
+      label: 'Sitemap.xml',
+      description: site.published ? 'Site incluído no sitemap' : 'Publique o site para aparecer',
+      ok: site.published,
+      color: site.published ? 'text-green-600' : 'text-amber-500',
+      bg: site.published ? 'bg-green-50' : 'bg-amber-50',
+      link: `${origin}/sitemap.xml`,
+    },
+    {
+      icon: Bot,
+      label: 'robots.txt',
+      description: 'Permite indexação por Google e LLMs',
+      ok: true,
+      color: 'text-green-600',
+      bg: 'bg-green-50',
+      link: `${origin}/robots.txt`,
+    },
+    {
+      icon: Link2,
+      label: 'JSON-LD Schema',
+      description: site.published ? 'LocalBusiness injetado automaticamente' : 'Disponível após publicação',
+      ok: site.published,
+      color: site.published ? 'text-green-600' : 'text-amber-500',
+      bg: site.published ? 'bg-green-50' : 'bg-amber-50',
+    },
+    {
+      icon: Bot,
+      label: 'llms.txt',
+      description: site.published ? 'Site visível para ChatGPT, Claude, Gemini' : 'Disponível após publicação',
+      ok: site.published,
+      color: site.published ? 'text-green-600' : 'text-amber-500',
+      bg: site.published ? 'bg-green-50' : 'bg-amber-50',
+      link: `${origin}/llms.txt`,
+    },
+  ]
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-6">
+      <div className="flex items-center gap-2 mb-4">
+        <Search className="w-4 h-4 text-gray-400" />
+        <h3 className="font-semibold text-gray-900 text-sm">SEO e Descoberta</h3>
+      </div>
+      <div className="space-y-3">
+        {checks.map((c) => (
+          <div key={c.label} className="flex items-start gap-3">
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${c.bg}`}>
+              <c.icon className={`w-3.5 h-3.5 ${c.color}`} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-800">{c.label}</span>
+                {c.ok
+                  ? <span className="text-xs text-green-600 font-medium">✓ Ativo</span>
+                  : <span className="text-xs text-amber-500 font-medium">⚠ Pendente</span>
+                }
+              </div>
+              <p className="text-xs text-gray-400 mt-0.5">{c.description}</p>
+            </div>
+            {c.link && (
+              <a
+                href={c.link}
+                target="_blank"
+                rel="noreferrer"
+                className="text-gray-300 hover:text-brand-500 transition shrink-0"
+                title="Abrir"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   )

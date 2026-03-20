@@ -41,3 +41,9 @@ RETURNING *;
 UPDATE sites SET custom_domain = $2, updated_at = NOW()
 WHERE id = $1
 RETURNING *;
+
+-- name: GetAllPublishedSites :many
+SELECT id, slug, business_name, business_description, updated_at
+FROM sites
+WHERE published = true
+ORDER BY updated_at DESC;

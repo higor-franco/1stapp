@@ -220,9 +220,11 @@ func (h *Handler) handleServeSite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	html := injectJSONLD(site.HtmlContent, site, h.cfg.BaseURL)
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(site.HtmlContent)) //nolint:errcheck
+	w.Write([]byte(html)) //nolint:errcheck
 }
 
 // GET /site/{slug}/preview — serve o HTML para preview (sem exigir published)

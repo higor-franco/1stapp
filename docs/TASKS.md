@@ -31,8 +31,8 @@
 
 | Tarefa | Status | Notas |
 |--------|--------|-------|
-| SEO básico automático (meta tags, sitemap, robots.txt) | Pendente | Todos os planos |
-| SEO avançado (JSON-LD, llms.txt, Open Graph, hreflang) | Pendente | Exclusivo Plano Start |
+| SEO básico automático (meta tags, sitemap, robots.txt) | Done | robots.txt, sitemap.xml dinâmico, meta tags via Gemini prompt |
+| SEO avançado (JSON-LD, llms.txt, Open Graph) | Done | JSON-LD LocalBusiness injetado no HTML ao servir, llms.txt com todos os sites, painel SEO no dashboard |
 
 ## Fase 5 — Pagamentos e Assinatura (Vindi)
 

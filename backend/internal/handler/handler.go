@@ -57,6 +57,11 @@ func (h *Handler) Routes() http.Handler {
 	// Public site serving
 	mux.HandleFunc("GET /site/{slug}", h.handleServeSite)
 
+	// SEO / discovery
+	mux.HandleFunc("GET /robots.txt", h.handleRobotsTxt)
+	mux.HandleFunc("GET /sitemap.xml", h.handleSitemapXML)
+	mux.HandleFunc("GET /llms.txt", h.handleLlmsTxt)
+
 	// Dev-only login (only when DEV_MODE=1)
 	if h.cfg.DevMode {
 		mux.HandleFunc("POST /api/dev/login", h.handleDevLogin)
