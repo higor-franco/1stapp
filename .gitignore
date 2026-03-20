@@ -1,0 +1,6 @@
+backend/cmd/server/server
+frontend/dist/
+frontend/node_modules/
+.venv/
+.env
+.claude/launch.json

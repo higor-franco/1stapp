@@ -1,0 +1,112 @@
+package handler
+
+import (
+	"context"
+	"encoding/json"
+	"log/slog"
+	"net/http"
+	"os"
+	"path/filepath"
+
+	"github.com/higor-franco/1stapp/internal/config"
+	db "github.com/higor-franco/1stapp/internal/database/sqlc"
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+type contextKey string
+
+const userContextKey contextKey = "user"
+
+type Handler struct {
+	db   *db.Queries
+	pool *pgxpool.Pool
+	cfg  *config.Config
+}
+
+func New(pool *pgxpool.Pool, cfg *config.Config) *Handler {
+	return &Handler{
+		db:   db.New(pool),
+		pool: pool,
+		cfg:  cfg,
+	}
+}
+
+func (h *Handler) Routes() http.Handler {
+	mux := http.NewServeMux()
+
+	// Health
+	mux.HandleFunc("GET /up", h.handleHealth)
+
+	// Auth
+	mux.HandleFunc("POST /api/auth/register", h.handleRegister)
+	mux.HandleFunc("POST /api/auth/login", h.handleLogin)
+	mux.HandleFunc("POST /api/auth/logout", h.handleLogout)
+	mux.HandleFunc("GET /api/auth/me", h.requireAuth(h.handleMe))
+
+	// Dev-only login (only when DEV_MODE=1)
+	if h.cfg.DevMode {
+		mux.HandleFunc("POST /api/dev/login", h.handleDevLogin)
+	}
+
+	// Static assets
+	mux.Handle("/assets/", http.StripPrefix("/assets/",
+		http.FileServer(http.Dir(filepath.Join("frontend", "dist", "assets")))))
+
+	// SPA fallback
+	mux.HandleFunc("/", h.handleSPA)
+
+	return mux
+}
+
+func (h *Handler) requireAuth(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("session")
+		if err != nil {
+			writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "não autorizado"})
+			return
+		}
+		session, err := h.db.GetSessionByToken(r.Context(), cookie.Value)
+		if err != nil {
+			writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "sessão inválida"})
+			return
+		}
+		user, err := h.db.GetUserByID(r.Context(), session.UserID)
+		if err != nil {
+			writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "usuário não encontrado"})
+			return
+		}
+		ctx := context.WithValue(r.Context(), userContextKey, user)
+		next(w, r.WithContext(ctx))
+	}
+}
+
+func userFromCtx(r *http.Request) db.User {
+	return r.Context().Value(userContextKey).(db.User)
+}
+
+func (h *Handler) handleHealth(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("ok")) //nolint:errcheck
+}
+
+func (h *Handler) handleSPA(w http.ResponseWriter, r *http.Request) {
+	indexPath := filepath.Join("frontend", "dist", "index.html")
+	if _, err := os.Stat(indexPath); os.IsNotExist(err) {
+		// dev mode: just return 200 (Vite handles the frontend)
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	http.ServeFile(w, r, indexPath)
+}
+
+func writeJSON(w http.ResponseWriter, status int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	if err := json.NewEncoder(w).Encode(v); err != nil {
+		slog.Error("writeJSON encode error", "err", err)
+	}
+}
+
+func readJSON(r *http.Request, v any) error {
+	return json.NewDecoder(r.Body).Decode(v)
+}
