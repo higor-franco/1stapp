@@ -9,6 +9,25 @@ SELECT * FROM sites WHERE user_id = $1;
 -- name: GetSiteBySlug :one
 SELECT * FROM sites WHERE slug = $1;
 
+-- name: SlugExists :one
+SELECT EXISTS(SELECT 1 FROM sites WHERE slug = $1) AS exists;
+
+-- name: UpdateSiteGeneration :one
+UPDATE sites
+SET business_name        = $2,
+    business_description = $3,
+    color_palette        = $4,
+    html_content         = $5,
+    generation_count     = generation_count + 1,
+    updated_at           = NOW()
+WHERE user_id = $1
+RETURNING *;
+
+-- name: UpdateSitePublished :one
+UPDATE sites SET published = $2, updated_at = NOW()
+WHERE id = $1
+RETURNING *;
+
 -- name: UpdateSiteContent :one
 UPDATE sites
 SET html_content      = $2,

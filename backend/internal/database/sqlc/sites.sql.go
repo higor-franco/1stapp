@@ -99,6 +99,17 @@ func (q *Queries) GetSiteByUserID(ctx context.Context, userID pgtype.UUID) (Site
 	return i, err
 }
 
+const slugExists = `-- name: SlugExists :one
+SELECT EXISTS(SELECT 1 FROM sites WHERE slug = $1) AS exists
+`
+
+func (q *Queries) SlugExists(ctx context.Context, slug string) (bool, error) {
+	row := q.db.QueryRow(ctx, slugExists, slug)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const updateSiteContent = `-- name: UpdateSiteContent :one
 UPDATE sites
 SET html_content      = $2,
@@ -148,6 +159,83 @@ type UpdateSiteCustomDomainParams struct {
 
 func (q *Queries) UpdateSiteCustomDomain(ctx context.Context, arg UpdateSiteCustomDomainParams) (Site, error) {
 	row := q.db.QueryRow(ctx, updateSiteCustomDomain, arg.ID, arg.CustomDomain)
+	var i Site
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Slug,
+		&i.BusinessName,
+		&i.BusinessDescription,
+		&i.ColorPalette,
+		&i.HtmlContent,
+		&i.Published,
+		&i.CustomDomain,
+		&i.GenerationCount,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateSiteGeneration = `-- name: UpdateSiteGeneration :one
+UPDATE sites
+SET business_name        = $2,
+    business_description = $3,
+    color_palette        = $4,
+    html_content         = $5,
+    generation_count     = generation_count + 1,
+    updated_at           = NOW()
+WHERE user_id = $1
+RETURNING id, user_id, slug, business_name, business_description, color_palette, html_content, published, custom_domain, generation_count, created_at, updated_at
+`
+
+type UpdateSiteGenerationParams struct {
+	UserID              pgtype.UUID `json:"user_id"`
+	BusinessName        string      `json:"business_name"`
+	BusinessDescription string      `json:"business_description"`
+	ColorPalette        string      `json:"color_palette"`
+	HtmlContent         string      `json:"html_content"`
+}
+
+func (q *Queries) UpdateSiteGeneration(ctx context.Context, arg UpdateSiteGenerationParams) (Site, error) {
+	row := q.db.QueryRow(ctx, updateSiteGeneration,
+		arg.UserID,
+		arg.BusinessName,
+		arg.BusinessDescription,
+		arg.ColorPalette,
+		arg.HtmlContent,
+	)
+	var i Site
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Slug,
+		&i.BusinessName,
+		&i.BusinessDescription,
+		&i.ColorPalette,
+		&i.HtmlContent,
+		&i.Published,
+		&i.CustomDomain,
+		&i.GenerationCount,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateSitePublished = `-- name: UpdateSitePublished :one
+UPDATE sites SET published = $2, updated_at = NOW()
+WHERE id = $1
+RETURNING id, user_id, slug, business_name, business_description, color_palette, html_content, published, custom_domain, generation_count, created_at, updated_at
+`
+
+type UpdateSitePublishedParams struct {
+	ID        pgtype.UUID `json:"id"`
+	Published bool        `json:"published"`
+}
+
+func (q *Queries) UpdateSitePublished(ctx context.Context, arg UpdateSitePublishedParams) (Site, error) {
+	row := q.db.QueryRow(ctx, updateSitePublished, arg.ID, arg.Published)
 	var i Site
 	err := row.Scan(
 		&i.ID,

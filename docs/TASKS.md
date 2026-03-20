@@ -13,12 +13,12 @@
 
 | Tarefa | Status | Notas |
 |--------|--------|-------|
-| Integração com Google Gemini API | Pendente | Geração de HTML/CSS/JS responsivo via prompt |
-| Wizard de criação de site (frontend) | Pendente | Nome do negócio, prompt, paleta de cores |
-| Preview do site gerado | Pendente | Iframe sandbox com o HTML gerado |
-| Publicação do site no subdomínio | Pendente | `slug.locawebstart.com.br`, servido pelo Go |
-| Edição de textos do site gerado | Pendente | Interface simples de edição inline |
-| Regeneração do site | Pendente | Limite de 3x/mês no plano Free |
+| Integração com Google Gemini API | Done | gemini.go: client REST, prompt estruturado, extractHTML, 7 paletas |
+| Wizard de criação de site (frontend) | Done | CreateSitePage.tsx: form → generating → preview |
+| Preview do site gerado | Done | Iframe sandbox com srcDoc do HTML gerado |
+| Publicação do site no subdomínio | Done | GET /site/{slug} serve HTML público pelo Go |
+| Regeneração do site | Done | Limite de 3 gerações no plano Free (server-side) |
+| Edição de textos do site gerado | Pendente | Interface simples de edição inline (prompt-based) |
 
 ## Fase 3 — Geração de Logo por IA
 

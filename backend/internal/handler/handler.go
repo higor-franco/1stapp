@@ -43,6 +43,15 @@ func (h *Handler) Routes() http.Handler {
 	mux.HandleFunc("POST /api/auth/logout", h.handleLogout)
 	mux.HandleFunc("GET /api/auth/me", h.requireAuth(h.handleMe))
 
+	// Sites
+	mux.HandleFunc("GET /api/sites/me", h.requireAuth(h.handleGetMySite))
+	mux.HandleFunc("POST /api/sites/generate", h.requireAuth(h.handleGenerateSite))
+	mux.HandleFunc("PUT /api/sites/publish", h.requireAuth(h.handlePublishSite))
+	mux.HandleFunc("GET /api/sites/preview", h.requireAuth(h.handlePreviewSite))
+
+	// Public site serving
+	mux.HandleFunc("GET /site/{slug}", h.handleServeSite)
+
 	// Dev-only login (only when DEV_MODE=1)
 	if h.cfg.DevMode {
 		mux.HandleFunc("POST /api/dev/login", h.handleDevLogin)

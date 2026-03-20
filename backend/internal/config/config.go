@@ -3,9 +3,10 @@ package config
 import "os"
 
 type Config struct {
-	DatabaseURL string
-	Port        string
-	DevMode     bool
+	DatabaseURL   string
+	Port          string
+	DevMode       bool
+	GeminiAPIKey  string
 }
 
 func Load() *Config {
@@ -14,8 +15,9 @@ func Load() *Config {
 		port = "8080"
 	}
 	return &Config{
-		DatabaseURL: os.Getenv("DATABASE_URL"),
-		Port:        port,
-		DevMode:     os.Getenv("DEV_MODE") == "1",
+		DatabaseURL:  os.Getenv("DATABASE_URL"),
+		Port:         port,
+		DevMode:      os.Getenv("DEV_MODE") == "1",
+		GeminiAPIKey: os.Getenv("GEMINI_API_KEY"),
 	}
 }
