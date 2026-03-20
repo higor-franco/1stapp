@@ -24,8 +24,8 @@
 
 | Tarefa | Status | Notas |
 |--------|--------|-------|
-| Integração com Claude API para logos SVG | Pendente | 3 opções geradas por prompt |
-| Interface de seleção e download de logo | Pendente | Exibir SVGs, botão de download |
+| Integração com Claude API para logos SVG | Done | anthropic.go: cliente REST, 3 opções em JSON, parseamento robusto |
+| Interface de seleção e download de logo | Done | LogoPage.tsx: 3 cards clicáveis, seleção persistida, download SVG, upgrade wall para plano Free |
 
 ## Fase 4 — SEO e Descoberta
 

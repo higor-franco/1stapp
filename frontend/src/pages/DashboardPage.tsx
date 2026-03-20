@@ -4,6 +4,7 @@ import {
   ExternalLink, RefreshCw, Eye, EyeOff, Copy, Check
 } from 'lucide-react'
 import CreateSitePage from './CreateSitePage'
+import LogoPage from './LogoPage'
 
 interface User {
   id: string
@@ -256,15 +257,7 @@ export default function DashboardPage({ user, onLogout }: Props) {
 
         {/* Logo section */}
         {section === 'logo' && (
-          <div className="max-w-2xl mx-auto text-center py-16">
-            <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Sparkles className="w-8 h-8 text-purple-600" />
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Geração de Logo com IA</h2>
-            <p className="text-gray-500">
-              Em breve! O Claude irá criar logos profissionais em SVG para o seu negócio.
-            </p>
-          </div>
+          <LogoPage user={user} />
         )}
       </main>
     </div>

@@ -7,6 +7,7 @@ type Config struct {
 	Port          string
 	DevMode       bool
 	GeminiAPIKey  string
+	ClaudeAPIKey  string
 }
 
 func Load() *Config {
@@ -19,5 +20,6 @@ func Load() *Config {
 		Port:         port,
 		DevMode:      os.Getenv("DEV_MODE") == "1",
 		GeminiAPIKey: os.Getenv("GEMINI_API_KEY"),
+		ClaudeAPIKey: os.Getenv("CLAUDE_API_KEY"),
 	}
 }
