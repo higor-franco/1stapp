@@ -49,10 +49,10 @@
 
 | Tarefa | Status | Notas |
 |--------|--------|-------|
-| Página Bio pública (`/bio/:slug`) | Pendente | Links do site, WhatsApp, redes sociais — design mobile-first |
-| Interface de configuração da Página Bio no painel | Pendente | WhatsApp, links opcionais, preview |
-| Integração Octadesk: injeção do widget no site gerado | Pendente | Usuário cola código do widget, plataforma injeta no HTML publicado |
-| Interface de configuração Octadesk no painel | Pendente | Campo para código do widget + instruções de cadastro na Octadesk |
+| Página Bio pública (`/bio/:slug`) | Done | bio.go: renderBioPage HTML server-side, logo SVG, WhatsApp, redes, links extras, widget Octadesk |
+| Interface de configuração da Página Bio no painel | Done | BioConfigPage.tsx: WhatsApp, Instagram, Facebook, TikTok, YouTube, links extras, toggle publish, preview iframe |
+| Integração Octadesk: injeção do widget no site gerado | Done | octadesk.go: injeta/remove widget no HTML do site (marcador HTML) |
+| Interface de configuração Octadesk no painel | Done | OctadeskPage.tsx: cola código do widget, número WhatsApp, toggle ativo |
 
 ## Fase 7 — Domínio Personalizado
 

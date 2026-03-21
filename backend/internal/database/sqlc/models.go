@@ -8,6 +8,20 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type BioPage struct {
+	ID         pgtype.UUID        `json:"id"`
+	UserID     pgtype.UUID        `json:"user_id"`
+	Whatsapp   string             `json:"whatsapp"`
+	Instagram  string             `json:"instagram"`
+	Facebook   string             `json:"facebook"`
+	Tiktok     string             `json:"tiktok"`
+	Youtube    string             `json:"youtube"`
+	ExtraLinks string             `json:"extra_links"`
+	Published  bool               `json:"published"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+}
+
 type Invoice struct {
 	ID          pgtype.UUID        `json:"id"`
 	UserID      pgtype.UUID        `json:"user_id"`
@@ -28,6 +42,16 @@ type Logo struct {
 	SelectedIndex int32              `json:"selected_index"`
 	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+}
+
+type OctadeskConfig struct {
+	ID             pgtype.UUID        `json:"id"`
+	UserID         pgtype.UUID        `json:"user_id"`
+	WidgetCode     string             `json:"widget_code"`
+	WhatsappNumber string             `json:"whatsapp_number"`
+	Active         bool               `json:"active"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
 }
 
 type OnboardingStep struct {

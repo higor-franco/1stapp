@@ -64,6 +64,15 @@ func (h *Handler) Routes() http.Handler {
 	// Vindi webhook (public)
 	mux.HandleFunc("POST /api/webhooks/vindi", h.handleVindiWebhook)
 
+	// Bio page
+	mux.HandleFunc("GET /api/bio/me", h.requireAuth(h.handleGetBio))
+	mux.HandleFunc("POST /api/bio", h.requireAuth(h.handleSaveBio))
+	mux.HandleFunc("GET /bio/{slug}", h.handleServeBio)
+
+	// Octadesk
+	mux.HandleFunc("GET /api/octadesk", h.requireAuth(h.handleGetOctadesk))
+	mux.HandleFunc("POST /api/octadesk", h.requireAuth(h.handleSaveOctadesk))
+
 	// Public site serving
 	mux.HandleFunc("GET /site/{slug}", h.handleServeSite)
 
