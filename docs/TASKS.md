@@ -38,12 +38,12 @@
 
 | Tarefa | Status | Notas |
 |--------|--------|-------|
-| Integração com Vindi API — assinatura da plataforma | Pendente | Criação de cliente, plano e assinatura do Plano Start |
-| Fluxo de upgrade para Plano Start | Pendente | Cadastro de cartão, cobrança recorrente |
-| Webhook Vindi para atualização de status da assinatura | Pendente | Ativar/desativar plano em tempo real |
-| Painel de assinatura (histórico de faturas, cancelamento) | Pendente | |
-| Add-on de pagamentos no site do cliente (Plano Start) | Pendente | Usuário conecta conta Vindi, configura produtos, injeta botão de pagamento no site gerado |
-| Interface de configuração do add-on de pagamentos | Pendente | Formulário para chave API Vindi do cliente, nome/valor do serviço |
+| Integração com Vindi API — assinatura da plataforma | Done | vindi.go: cliente REST, createCustomer, createPaymentProfile, createSubscription |
+| Fluxo de upgrade para Plano Start | Done | UpgradePage.tsx: form de cartão → POST /api/subscription/upgrade → plano atualizado |
+| Webhook Vindi para atualização de status da assinatura | Done | POST /api/webhooks/vindi: bill_paid, subscription_canceled, subscription_reactivated |
+| Painel de assinatura (histórico de faturas, cancelamento) | Done | SubscriptionPage.tsx + GET /api/subscription/me, POST /api/subscription/cancel |
+| Add-on de pagamentos no site do cliente (Plano Start) | Done | UpsertPaymentAddon: injeta/remove botão de pagamento no HTML do site publicado |
+| Interface de configuração do add-on de pagamentos | Done | PaymentAddonPage.tsx: chave Vindi, nome/valor/tipo, toggle ativo, preview do botão |
 
 ## Fase 6 — Página Bio (Linktree) e Octadesk
 

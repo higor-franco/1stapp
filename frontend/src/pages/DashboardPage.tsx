@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Zap, Globe, Sparkles, LogOut, LayoutDashboard,
   ExternalLink, RefreshCw, Eye, EyeOff, Copy, Check,
-  Search, FileText, Bot, Link2
+  Search, FileText, Bot, Link2, CreditCard, Receipt
 } from 'lucide-react'
 import CreateSitePage from './CreateSitePage'
 import LogoPage from './LogoPage'
+import PaymentAddonPage from './PaymentAddonPage'
 
 interface User {
   id: string
@@ -29,11 +31,13 @@ interface Site {
 interface Props {
   user: User
   onLogout: () => void
+  onUserUpdate?: (u: User) => void
 }
 
-type Section = 'dashboard' | 'criar-site' | 'logo'
+type Section = 'dashboard' | 'criar-site' | 'logo' | 'pagamentos'
 
-export default function DashboardPage({ user, onLogout }: Props) {
+export default function DashboardPage({ user, onLogout, onUserUpdate: _onUserUpdate }: Props) {
+  const navigate = useNavigate()
   const [section, setSection] = useState<Section>('dashboard')
   const [site, setSite] = useState<Site | null | undefined>(undefined) // undefined = loading
   const [loggingOut, setLoggingOut] = useState(false)
@@ -80,6 +84,7 @@ export default function DashboardPage({ user, onLogout }: Props) {
     { id: 'dashboard' as Section, label: 'Dashboard', icon: LayoutDashboard },
     { id: 'criar-site' as Section, label: site ? 'Meu Site' : 'Criar Site', icon: Globe },
     { id: 'logo' as Section, label: 'Minha Logo', icon: Sparkles },
+    { id: 'pagamentos' as Section, label: 'Pagamentos', icon: CreditCard },
   ]
 
   return (
@@ -122,6 +127,13 @@ export default function DashboardPage({ user, onLogout }: Props) {
               <p className="text-xs text-gray-400">{user.plan === 'free' ? 'Plano Free' : 'Plano Start'}</p>
             </div>
           </div>
+          <button
+            onClick={() => navigate('/assinatura')}
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors mb-1"
+          >
+            <Receipt className="w-3.5 h-3.5" />
+            Minha assinatura
+          </button>
           <button
             onClick={handleLogout}
             disabled={loggingOut}
@@ -230,7 +242,10 @@ export default function DashboardPage({ user, onLogout }: Props) {
                     Domínio próprio, gerações ilimitadas, SEO avançado, Página Bio, WhatsApp e pagamentos.
                   </p>
                 </div>
-                <button className="bg-amber-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-amber-600 transition shrink-0 ml-4">
+                <button
+                  onClick={() => navigate('/upgrade')}
+                  className="bg-amber-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-amber-600 transition shrink-0 ml-4"
+                >
                   Fazer upgrade
                 </button>
               </div>
@@ -259,6 +274,13 @@ export default function DashboardPage({ user, onLogout }: Props) {
         {/* Logo section */}
         {section === 'logo' && (
           <LogoPage user={user} />
+        )}
+
+        {/* Pagamentos section */}
+        {section === 'pagamentos' && (
+          <div className="max-w-3xl mx-auto">
+            <PaymentAddonPage userPlan={user.plan} />
+          </div>
         )}
       </main>
     </div>

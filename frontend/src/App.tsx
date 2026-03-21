@@ -4,6 +4,8 @@ import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
+import UpgradePage from './pages/UpgradePage'
+import SubscriptionPage from './pages/SubscriptionPage'
 
 interface User {
   id: string
@@ -37,7 +39,9 @@ function App() {
         <Route path="/" element={<LandingPage user={user} />} />
         <Route path="/entrar" element={user ? <Navigate to="/painel" replace /> : <LoginPage onLogin={setUser} />} />
         <Route path="/cadastro" element={user ? <Navigate to="/painel" replace /> : <RegisterPage onLogin={setUser} />} />
-        <Route path="/painel" element={user ? <DashboardPage user={user} onLogout={() => setUser(null)} /> : <Navigate to="/entrar" replace />} />
+        <Route path="/painel" element={user ? <DashboardPage user={user} onLogout={() => setUser(null)} onUserUpdate={setUser} /> : <Navigate to="/entrar" replace />} />
+        <Route path="/upgrade" element={user ? <UpgradePage /> : <Navigate to="/entrar" replace />} />
+        <Route path="/assinatura" element={user ? <SubscriptionPage /> : <Navigate to="/entrar" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

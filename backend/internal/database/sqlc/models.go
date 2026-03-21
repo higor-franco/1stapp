@@ -8,6 +8,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Invoice struct {
+	ID          pgtype.UUID        `json:"id"`
+	UserID      pgtype.UUID        `json:"user_id"`
+	VindiBillID pgtype.Int4        `json:"vindi_bill_id"`
+	Amount      int32              `json:"amount"`
+	Status      string             `json:"status"`
+	DueAt       pgtype.Timestamptz `json:"due_at"`
+	PaidAt      pgtype.Timestamptz `json:"paid_at"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
 type Logo struct {
 	ID            pgtype.UUID        `json:"id"`
 	UserID        pgtype.UUID        `json:"user_id"`
@@ -26,6 +37,18 @@ type OnboardingStep struct {
 	Completed   bool               `json:"completed"`
 	CompletedAt pgtype.Timestamptz `json:"completed_at"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
+type PaymentAddon struct {
+	ID            pgtype.UUID        `json:"id"`
+	UserID        pgtype.UUID        `json:"user_id"`
+	VindiApiKey   string             `json:"vindi_api_key"`
+	ServiceName   string             `json:"service_name"`
+	ServiceAmount int32              `json:"service_amount"`
+	ServiceType   string             `json:"service_type"`
+	Active        bool               `json:"active"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Session struct {
@@ -47,6 +70,17 @@ type Site struct {
 	Published           bool               `json:"published"`
 	CustomDomain        pgtype.Text        `json:"custom_domain"`
 	GenerationCount     int32              `json:"generation_count"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
+}
+
+type Subscription struct {
+	ID                  pgtype.UUID        `json:"id"`
+	UserID              pgtype.UUID        `json:"user_id"`
+	VindiCustomerID     pgtype.Int4        `json:"vindi_customer_id"`
+	VindiSubscriptionID pgtype.Int4        `json:"vindi_subscription_id"`
+	Status              string             `json:"status"`
+	CurrentPeriodEnd    pgtype.Timestamptz `json:"current_period_end"`
 	CreatedAt           pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
 }

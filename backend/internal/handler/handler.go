@@ -54,6 +54,16 @@ func (h *Handler) Routes() http.Handler {
 	mux.HandleFunc("POST /api/logos/generate", h.requireAuth(h.handleGenerateLogo))
 	mux.HandleFunc("PUT /api/logos/select", h.requireAuth(h.handleSelectLogo))
 
+	// Subscription & payments
+	mux.HandleFunc("POST /api/subscription/upgrade", h.requireAuth(h.handleUpgrade))
+	mux.HandleFunc("GET /api/subscription/me", h.requireAuth(h.handleGetSubscription))
+	mux.HandleFunc("POST /api/subscription/cancel", h.requireAuth(h.handleCancelSubscription))
+	mux.HandleFunc("GET /api/payment-addon", h.requireAuth(h.handleGetPaymentAddon))
+	mux.HandleFunc("POST /api/payment-addon", h.requireAuth(h.handleSavePaymentAddon))
+
+	// Vindi webhook (public)
+	mux.HandleFunc("POST /api/webhooks/vindi", h.handleVindiWebhook)
+
 	// Public site serving
 	mux.HandleFunc("GET /site/{slug}", h.handleServeSite)
 
