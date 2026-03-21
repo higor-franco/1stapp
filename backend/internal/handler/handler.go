@@ -73,6 +73,12 @@ func (h *Handler) Routes() http.Handler {
 	mux.HandleFunc("GET /api/octadesk", h.requireAuth(h.handleGetOctadesk))
 	mux.HandleFunc("POST /api/octadesk", h.requireAuth(h.handleSaveOctadesk))
 
+	// Onboarding
+	mux.HandleFunc("GET /api/onboarding", h.requireAuth(h.handleGetOnboarding))
+	mux.HandleFunc("GET /api/onboarding/banner", h.requireAuth(h.handleOnboardingBanner))
+	mux.HandleFunc("POST /api/onboarding/dismiss", h.requireAuth(h.handleDismissBanner))
+	mux.HandleFunc("POST /api/onboarding/{step}/skip", h.requireAuth(h.handleSkipStep))
+
 	// Domain
 	mux.HandleFunc("GET /api/domain/me", h.requireAuth(h.handleGetDomain))
 	mux.HandleFunc("POST /api/domain/configure", h.requireAuth(h.handleConfigureDomain))

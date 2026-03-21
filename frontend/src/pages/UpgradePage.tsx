@@ -60,7 +60,7 @@ export default function UpgradePage() {
         setError(data.error || 'Erro ao processar pagamento')
         return
       }
-      navigate('/painel', { state: { upgraded: true } })
+      navigate('/onboarding')
     } catch {
       setError('Erro de conexão. Tente novamente.')
     } finally {

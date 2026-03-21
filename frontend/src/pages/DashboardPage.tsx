@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Zap, Globe, Sparkles, LogOut, LayoutDashboard,
   ExternalLink, RefreshCw, Eye, EyeOff, Copy, Check,
@@ -41,11 +41,15 @@ type Section = 'dashboard' | 'criar-site' | 'logo' | 'pagamentos' | 'bio' | 'oct
 
 export default function DashboardPage({ user, onLogout, onUserUpdate: _onUserUpdate }: Props) {
   const navigate = useNavigate()
-  const [section, setSection] = useState<Section>('dashboard')
+  const location = useLocation()
+  const [section, setSection] = useState<Section>(
+    (location.state as { section?: Section } | null)?.section ?? 'dashboard'
+  )
   const [site, setSite] = useState<Site | null | undefined>(undefined) // undefined = loading
   const [loggingOut, setLoggingOut] = useState(false)
   const [toggling, setToggling] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [banner, setBanner] = useState<{ show: boolean; pending: number; total: number } | null>(null)
 
   useEffect(() => {
     fetch('/api/sites/me')
@@ -53,6 +57,19 @@ export default function DashboardPage({ user, onLogout, onUserUpdate: _onUserUpd
       .then(data => setSite(data.site ?? null))
       .catch(() => setSite(null))
   }, [])
+
+  useEffect(() => {
+    if (user.plan !== 'start') return
+    fetch('/api/onboarding/banner')
+      .then(r => r.json())
+      .then(setBanner)
+      .catch(() => {})
+  }, [user.plan])
+
+  function dismissBanner() {
+    fetch('/api/onboarding/dismiss', { method: 'POST' }).catch(() => {})
+    setBanner(b => b ? { ...b, show: false } : b)
+  }
 
   async function handleLogout() {
     setLoggingOut(true)
@@ -153,6 +170,32 @@ export default function DashboardPage({ user, onLogout, onUserUpdate: _onUserUpd
 
       {/* Main */}
       <main className="pl-64 flex-1 p-8">
+        {/* Onboarding banner */}
+        {banner?.show && (
+          <div className="max-w-3xl mx-auto mb-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl px-5 py-4 flex items-center gap-4">
+              <div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-blue-900">
+                  {banner.pending} {banner.pending === 1 ? 'etapa pendente' : 'etapas pendentes'} de configuração
+                </p>
+                <p className="text-xs text-blue-700 mt-0.5">Complete o onboarding para aproveitar tudo do Plano Start.</p>
+              </div>
+              <button
+                onClick={() => navigate('/onboarding')}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shrink-0"
+              >
+                Ver etapas
+              </button>
+              <button onClick={dismissBanner} className="text-blue-400 hover:text-blue-600 text-lg leading-none shrink-0">×</button>
+            </div>
+          </div>
+        )}
+
         {/* Dashboard section */}
         {section === 'dashboard' && (
           <div className="max-w-3xl mx-auto">

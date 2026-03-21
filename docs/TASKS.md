@@ -66,9 +66,9 @@
 
 | Tarefa | Status | Notas |
 |--------|--------|-------|
-| Tela de onboarding passo a passo (Plano Start) | Pendente | 7 etapas: site, logo, bio, WhatsApp, pagamentos, domínio, SEO |
-| Progresso persistido no banco (etapas concluídas/pendentes) | Pendente | |
-| Banner de etapas incompletas no painel | Pendente | |
+| Tela de onboarding passo a passo (Plano Start) | Done | OnboardingPage.tsx: 7 etapas, barra de progresso, "Configurar agora" / "Fazer depois", redireciona para seção do dashboard |
+| Progresso persistido no banco (etapas concluídas/pendentes) | Done | computeSteps: auto-detecta conclusão a partir dos dados reais; UpsertOnboardingStep persiste |
+| Banner de etapas incompletas no painel | Done | GET /api/onboarding/banner + POST /api/onboarding/dismiss + banner dismissível no DashboardPage |
 
 ## Fase 9 — Painel de Administração
 
