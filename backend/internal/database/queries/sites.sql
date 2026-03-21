@@ -42,6 +42,9 @@ UPDATE sites SET custom_domain = $2, updated_at = NOW()
 WHERE id = $1
 RETURNING *;
 
+-- name: GetSiteByCustomDomain :one
+SELECT * FROM sites WHERE custom_domain = $1 AND published = true LIMIT 1;
+
 -- name: GetAllPublishedSites :many
 SELECT id, slug, business_name, business_description, updated_at
 FROM sites

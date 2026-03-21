@@ -92,6 +92,30 @@ func (q *Queries) GetAllPublishedSites(ctx context.Context) ([]GetAllPublishedSi
 	return items, nil
 }
 
+const getSiteByCustomDomain = `-- name: GetSiteByCustomDomain :one
+SELECT id, user_id, slug, business_name, business_description, color_palette, html_content, published, custom_domain, generation_count, created_at, updated_at FROM sites WHERE custom_domain = $1 AND published = true LIMIT 1
+`
+
+func (q *Queries) GetSiteByCustomDomain(ctx context.Context, customDomain pgtype.Text) (Site, error) {
+	row := q.db.QueryRow(ctx, getSiteByCustomDomain, customDomain)
+	var i Site
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Slug,
+		&i.BusinessName,
+		&i.BusinessDescription,
+		&i.ColorPalette,
+		&i.HtmlContent,
+		&i.Published,
+		&i.CustomDomain,
+		&i.GenerationCount,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getSiteBySlug = `-- name: GetSiteBySlug :one
 SELECT id, user_id, slug, business_name, business_description, color_palette, html_content, published, custom_domain, generation_count, created_at, updated_at FROM sites WHERE slug = $1
 `

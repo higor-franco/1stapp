@@ -441,6 +441,7 @@ func (h *Handler) updateSitePaymentButton(r *http.Request, user db.User, addon d
 	_, err = h.db.UpdateSiteContent(r.Context(), db.UpdateSiteContentParams{
 		ID:          site.ID,
 		HtmlContent: html,
+		Published:   site.Published,
 	})
 	return err
 }

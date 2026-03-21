@@ -58,9 +58,9 @@
 
 | Tarefa | Status | Notas |
 |--------|--------|-------|
-| Pesquisa de disponibilidade de domínio | Pendente | Exibir resultado + link para Locaweb |
-| Configuração de domínio personalizado | Pendente | Usuário informa domínio, plataforma exibe DNS |
-| Roteamento por domínio personalizado no Go | Pendente | Identificar site pelo Host header |
+| Pesquisa de disponibilidade de domínio | Done | DomainPage.tsx: input + link direto para Locaweb com domínio pré-preenchido |
+| Configuração de domínio personalizado | Done | POST /api/domain/configure, tabela DNS, GET /api/domain/verify (DNS lookup) |
+| Roteamento por domínio personalizado no Go | Done | customDomainMiddleware: Host header → GetSiteByCustomDomain → serve HTML |
 
 ## Fase 8 — Onboarding Guiado
 

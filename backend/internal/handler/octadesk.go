@@ -99,6 +99,7 @@ func (h *Handler) updateSiteOctadeskWidget(r *http.Request, user db.User, cfg db
 	_, err = h.db.UpdateSiteContent(r.Context(), db.UpdateSiteContentParams{
 		ID:          site.ID,
 		HtmlContent: html,
+		Published:   site.Published,
 	})
 	return err
 }

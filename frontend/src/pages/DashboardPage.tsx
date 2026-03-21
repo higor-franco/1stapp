@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import {
   Zap, Globe, Sparkles, LogOut, LayoutDashboard,
   ExternalLink, RefreshCw, Eye, EyeOff, Copy, Check,
-  Search, FileText, Bot, Link2, CreditCard, Receipt, MessageCircle
+  Search, FileText, Bot, Link2, CreditCard, Receipt, MessageCircle, AtSign
 } from 'lucide-react'
 import CreateSitePage from './CreateSitePage'
 import LogoPage from './LogoPage'
 import PaymentAddonPage from './PaymentAddonPage'
 import BioConfigPage from './BioConfigPage'
 import OctadeskPage from './OctadeskPage'
+import DomainPage from './DomainPage'
 
 interface User {
   id: string
@@ -36,7 +37,7 @@ interface Props {
   onUserUpdate?: (u: User) => void
 }
 
-type Section = 'dashboard' | 'criar-site' | 'logo' | 'pagamentos' | 'bio' | 'octadesk'
+type Section = 'dashboard' | 'criar-site' | 'logo' | 'pagamentos' | 'bio' | 'octadesk' | 'dominio'
 
 export default function DashboardPage({ user, onLogout, onUserUpdate: _onUserUpdate }: Props) {
   const navigate = useNavigate()
@@ -89,6 +90,7 @@ export default function DashboardPage({ user, onLogout, onUserUpdate: _onUserUpd
     { id: 'pagamentos' as Section, label: 'Pagamentos', icon: CreditCard },
     { id: 'bio' as Section, label: 'Página Bio', icon: Link2 },
     { id: 'octadesk' as Section, label: 'WhatsApp', icon: MessageCircle },
+    { id: 'dominio' as Section, label: 'Domínio', icon: AtSign },
   ]
 
   return (
@@ -298,6 +300,13 @@ export default function DashboardPage({ user, onLogout, onUserUpdate: _onUserUpd
         {section === 'octadesk' && (
           <div className="max-w-3xl mx-auto">
             <OctadeskPage userPlan={user.plan} />
+          </div>
+        )}
+
+        {/* Domínio section */}
+        {section === 'dominio' && (
+          <div className="max-w-3xl mx-auto">
+            <DomainPage userPlan={user.plan} />
           </div>
         )}
       </main>

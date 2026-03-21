@@ -73,6 +73,12 @@ func (h *Handler) Routes() http.Handler {
 	mux.HandleFunc("GET /api/octadesk", h.requireAuth(h.handleGetOctadesk))
 	mux.HandleFunc("POST /api/octadesk", h.requireAuth(h.handleSaveOctadesk))
 
+	// Domain
+	mux.HandleFunc("GET /api/domain/me", h.requireAuth(h.handleGetDomain))
+	mux.HandleFunc("POST /api/domain/configure", h.requireAuth(h.handleConfigureDomain))
+	mux.HandleFunc("DELETE /api/domain/configure", h.requireAuth(h.handleRemoveDomain))
+	mux.HandleFunc("GET /api/domain/verify", h.requireAuth(h.handleVerifyDomain))
+
 	// Public site serving
 	mux.HandleFunc("GET /site/{slug}", h.handleServeSite)
 
@@ -93,7 +99,7 @@ func (h *Handler) Routes() http.Handler {
 	// SPA fallback
 	mux.HandleFunc("/", h.handleSPA)
 
-	return mux
+	return h.customDomainMiddleware(mux)
 }
 
 func (h *Handler) requireAuth(next http.HandlerFunc) http.HandlerFunc {
