@@ -6,6 +6,7 @@ servers:
     proxy:
       host: <%= ENV['INFRA_WEB_IP'] %>.nip.io
       ssl: true
+      response_timeout: 120
 
 env:
   clear:

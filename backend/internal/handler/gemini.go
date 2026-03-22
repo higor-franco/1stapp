@@ -21,7 +21,7 @@ type geminiClient struct {
 func newGeminiClient(apiKey string) *geminiClient {
 	return &geminiClient{
 		apiKey: apiKey,
-		client: &http.Client{Timeout: 90 * time.Second},
+		client: &http.Client{Timeout: 115 * time.Second},
 	}
 }
 
