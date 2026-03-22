@@ -7,6 +7,8 @@ import DashboardPage from './pages/DashboardPage'
 import UpgradePage from './pages/UpgradePage'
 import SubscriptionPage from './pages/SubscriptionPage'
 import OnboardingPage from './pages/OnboardingPage'
+import PrivacyPage from './pages/PrivacyPage'
+import CookieBanner from './components/CookieBanner'
 
 interface User {
   id: string
@@ -44,8 +46,10 @@ function App() {
         <Route path="/upgrade" element={user ? <UpgradePage /> : <Navigate to="/entrar" replace />} />
         <Route path="/assinatura" element={user ? <SubscriptionPage /> : <Navigate to="/entrar" replace />} />
         <Route path="/onboarding" element={user ? <OnboardingPage /> : <Navigate to="/entrar" replace />} />
+        <Route path="/privacidade" element={<PrivacyPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <CookieBanner />
     </BrowserRouter>
   )
 }
