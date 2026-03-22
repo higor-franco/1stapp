@@ -101,5 +101,5 @@
 |--------|--------|-------|
 | Política de privacidade e LGPD | Done | CookieBanner.tsx (consentimento + localStorage) + PrivacyPage.tsx (LGPD compliant) + rota /privacidade |
 | Testes automatizados (Go + Vitest) | Done | Go: TestExtractHTML, TestColorPaletteHint, TestFilterStrings, TestInjectJSONLD, TestSlugify, TestToSiteResponse, TestRegisterAndLogin (integration); Vitest: CookieBanner (5 testes) |
-| Deploy em ambiente Preview (Locaweb Cloud) | In Progress | Workflows criados, secrets configurados, aguardando primeiro run |
+| Deploy em ambiente Preview (Locaweb Cloud) | Done | https://191.252.228.18.nip.io — Kamal + GitHub Actions, supabase/postgres |
 | Deploy em produção | Pendente | Requer domínio personalizado ou tag v* |
