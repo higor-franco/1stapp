@@ -110,6 +110,60 @@ func (c *geminiClient) generateSite(ctx context.Context, businessName, descripti
 	return html, nil
 }
 
+// checkLLMPresence asks Gemini if businessName appears in results for keyword.
+// Returns (mentioned bool, snippet string).
+func (c *geminiClient) checkLLMPresence(ctx context.Context, businessName, keyword string) (bool, string, error) {
+	prompt := fmt.Sprintf(
+		`Quais são as empresas mais conhecidas e recomendadas para "%s" no Brasil? Liste até 5 nomes de empresas reais.`,
+		keyword,
+	)
+	reqBody := geminiReqBody{
+		Contents: []geminiContent{
+			{Parts: []geminiPart{{Text: prompt}}},
+		},
+		GenerationConfig: geminiGenerationConfig{
+			Temperature:     0.0,
+			MaxOutputTokens: 512,
+		},
+	}
+	body, err := json.Marshal(reqBody)
+	if err != nil {
+		return false, "", fmt.Errorf("marshal: %w", err)
+	}
+	url := fmt.Sprintf("%s?key=%s", geminiEndpoint, c.apiKey)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
+	if err != nil {
+		return false, "", fmt.Errorf("create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return false, "", fmt.Errorf("gemini request: %w", err)
+	}
+	defer resp.Body.Close()
+	respBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return false, "", fmt.Errorf("read: %w", err)
+	}
+	var gemResp geminiResponse
+	if err := json.Unmarshal(respBytes, &gemResp); err != nil {
+		return false, "", fmt.Errorf("parse: %w", err)
+	}
+	if gemResp.Error != nil {
+		return false, "", fmt.Errorf("gemini error: %s", gemResp.Error.Message)
+	}
+	if len(gemResp.Candidates) == 0 || len(gemResp.Candidates[0].Content.Parts) == 0 {
+		return false, "", nil
+	}
+	text := gemResp.Candidates[0].Content.Parts[0].Text
+	mentioned := strings.Contains(strings.ToLower(text), strings.ToLower(businessName))
+	snippet := text
+	if len(snippet) > 300 {
+		snippet = snippet[:300] + "…"
+	}
+	return mentioned, snippet, nil
+}
+
 func (c *geminiClient) editSite(ctx context.Context, currentHTML, instruction string) (string, error) {
 	// Truncate HTML to avoid exceeding token limits (~50k chars ≈ ~12k tokens)
 	if len(currentHTML) > 50000 {

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Zap, Globe, Sparkles, LogOut, LayoutDashboard,
   ExternalLink, RefreshCw, Eye, EyeOff, Copy, Check,
-  Search, FileText, Bot, Link2, CreditCard, Receipt, MessageCircle, AtSign
+  Search, FileText, Bot, Link2, CreditCard, Receipt, MessageCircle, AtSign, BarChart2
 } from 'lucide-react'
 import CreateSitePage from './CreateSitePage'
 import LogoPage from './LogoPage'
@@ -11,6 +11,7 @@ import PaymentAddonPage from './PaymentAddonPage'
 import BioConfigPage from './BioConfigPage'
 import OctadeskPage from './OctadeskPage'
 import DomainPage from './DomainPage'
+import SEOPage from './SEOPage'
 
 interface User {
   id: string
@@ -37,7 +38,7 @@ interface Props {
   onUserUpdate?: (u: User) => void
 }
 
-type Section = 'dashboard' | 'criar-site' | 'logo' | 'pagamentos' | 'bio' | 'octadesk' | 'dominio'
+type Section = 'dashboard' | 'criar-site' | 'logo' | 'pagamentos' | 'bio' | 'octadesk' | 'dominio' | 'seo'
 
 export default function DashboardPage({ user, onLogout, onUserUpdate: _onUserUpdate }: Props) {
   const navigate = useNavigate()
@@ -108,6 +109,7 @@ export default function DashboardPage({ user, onLogout, onUserUpdate: _onUserUpd
     { id: 'bio' as Section, label: 'Página Bio', icon: Link2 },
     { id: 'octadesk' as Section, label: 'WhatsApp', icon: MessageCircle },
     { id: 'dominio' as Section, label: 'Domínio', icon: AtSign },
+    { id: 'seo' as Section, label: 'SEO Analytics', icon: BarChart2 },
   ]
 
   return (
@@ -352,6 +354,11 @@ export default function DashboardPage({ user, onLogout, onUserUpdate: _onUserUpd
           <div className="max-w-3xl mx-auto">
             <DomainPage userPlan={user.plan} />
           </div>
+        )}
+
+        {/* SEO Analytics section */}
+        {section === 'seo' && (
+          <SEOPage userPlan={user.plan} />
         )}
       </main>
     </div>

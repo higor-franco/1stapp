@@ -75,6 +75,24 @@ type PaymentAddon struct {
 	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
 }
 
+type SeoConfig struct {
+	ID                 pgtype.UUID        `json:"id"`
+	UserID             pgtype.UUID        `json:"user_id"`
+	Keywords           []string           `json:"keywords"`
+	CompetitorDomains  []string           `json:"competitor_domains"`
+	DataForSeoLogin    string             `json:"data_for_seo_login"`
+	DataForSeoPassword string             `json:"data_for_seo_password"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+}
+
+type SeoReport struct {
+	ID      pgtype.UUID        `json:"id"`
+	UserID  pgtype.UUID        `json:"user_id"`
+	RunAt   pgtype.Timestamptz `json:"run_at"`
+	Results string             `json:"results"`
+}
+
 type Session struct {
 	ID        pgtype.UUID        `json:"id"`
 	UserID    pgtype.UUID        `json:"user_id"`

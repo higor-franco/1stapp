@@ -91,6 +91,12 @@ func (h *Handler) Routes() http.Handler {
 	// Public site serving
 	mux.HandleFunc("GET /site/{slug}", h.handleServeSite)
 
+	// SEO analytics
+	mux.HandleFunc("GET /api/seo/config", h.requireAuth(h.handleGetSEOConfig))
+	mux.HandleFunc("POST /api/seo/config", h.requireAuth(h.handleSaveSEOConfig))
+	mux.HandleFunc("POST /api/seo/analyze", h.requireAuth(h.handleRunSEOAnalysis))
+	mux.HandleFunc("GET /api/seo/reports", h.requireAuth(h.handleGetSEOReports))
+
 	// SEO / discovery
 	mux.HandleFunc("GET /robots.txt", h.handleRobotsTxt)
 	mux.HandleFunc("GET /sitemap.xml", h.handleSitemapXML)

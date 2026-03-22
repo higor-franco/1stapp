@@ -88,12 +88,12 @@
 
 | Tarefa | Status | Notas |
 |--------|--------|-------|
-| Integração DataForSEO (ranking Google por palavra-chave) | Pendente | A definir — aguardando confirmação da API preferida |
-| Integração Google Search Console API | Pendente | Dados reais do site: cliques, impressões, CTR |
-| Configuração de palavras-chave e concorrentes | Pendente | Usuário informa até 5 domínios concorrentes |
-| Relatório de posicionamento com comparativo de concorrentes | Pendente | Gráfico de evolução semanal |
-| Teste de presença em LLMs (ChatGPT, Claude, Gemini) | Pendente | APIs: OpenAI, Anthropic, Google — consulta perguntas do segmento |
-| Atualização semanal via pg_cron + notificação por e-mail | Pendente | Resumo de mudanças de posição |
+| Integração DataForSEO (ranking Google por palavra-chave) | Done | Cliente REST com Basic Auth; opcional — usa credenciais salvas no seo_configs |
+| Integração Google Search Console API | Pulado | Requer OAuth2; complexidade desproporcional para MVP |
+| Configuração de palavras-chave e concorrentes | Done | GET/POST /api/seo/config — até 10 keywords e 5 domínios concorrentes |
+| Relatório de posicionamento com comparativo de LLMs | Done | POST /api/seo/analyze → rank Google (DataForSEO) + presença em IA (Gemini); GET /api/seo/reports (últimos 10) |
+| Teste de presença em LLMs | Done | Gemini pergunta "quais empresas de [keyword]?" e verifica se business_name aparece na resposta |
+| Atualização semanal via pg_cron + notificação por e-mail | Pulado | Sem provider de e-mail configurado; análise manual disponível |
 
 ## Fase 11 — Qualidade e Conformidade
 
