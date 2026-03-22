@@ -10,7 +10,6 @@ servers:
       healthcheck:
         path: /up
         interval: 10
-        threshold: 3
 
 ssh:
   user: root
