@@ -101,5 +101,5 @@
 |--------|--------|-------|
 | Política de privacidade e LGPD | Done | CookieBanner.tsx (consentimento + localStorage) + PrivacyPage.tsx (LGPD compliant) + rota /privacidade |
 | Testes automatizados (Go + Vitest) | Done | Go: TestExtractHTML, TestColorPaletteHint, TestFilterStrings, TestInjectJSONLD, TestSlugify, TestToSiteResponse, TestRegisterAndLogin (integration); Vitest: CookieBanner (5 testes) |
-| Deploy em ambiente Preview (Locaweb Cloud) | Done | Dockerfile multi-stage (Node → Go → Alpine), .dockerignore, .env.example, PORT=80 |
-| Deploy em produção | Pendente | Requer credenciais da plataforma Locaweb Cloud |
+| Deploy em ambiente Preview (Locaweb Cloud) | In Progress | Workflows criados, secrets configurados, aguardando primeiro run |
+| Deploy em produção | Pendente | Requer domínio personalizado ou tag v* |

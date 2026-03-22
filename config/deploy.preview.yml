@@ -1,0 +1,30 @@
+# config/deploy.preview.yml — preview environment
+servers:
+  web:
+    hosts:
+      - <%= ENV['INFRA_WEB_IP'] %>
+    proxy:
+      host: <%= ENV['INFRA_WEB_IP'] %>.nip.io
+      ssl: true
+
+env:
+  clear:
+    APP_ENV: preview
+    BASE_URL: "https://<%= ENV['INFRA_WEB_IP'] %>.nip.io"
+  secret:
+    - POSTGRES_PASSWORD
+    - DATABASE_URL
+    - GEMINI_API_KEY
+    - CLAUDE_API_KEY
+
+accessories:
+  db:
+    image: supabase/postgres:17.6.1.097
+    host: <%= ENV['INFRA_DB_IP'] %>
+    port: "5432:5432"
+    cmd: "postgres -D /etc/postgresql -c shared_buffers=512MB -c effective_cache_size=1536MB -c work_mem=5MB -c maintenance_work_mem=128MB -c max_connections=100"
+    env:
+      secret:
+        - POSTGRES_PASSWORD
+    directories:
+      - /data/pgdata:/var/lib/postgresql/data
