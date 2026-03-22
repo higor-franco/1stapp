@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import DashboardPage from './DashboardPage'
 
 const mockUser = {
@@ -20,7 +21,7 @@ describe('DashboardPage', () => {
       json: async () => ({ site: null }),
     } as Response)
 
-    render(<DashboardPage user={mockUser} onLogout={vi.fn()} />)
+    render(<MemoryRouter><DashboardPage user={mockUser} onLogout={vi.fn()} /></MemoryRouter>)
     expect(screen.getByText(/Olá, João/i)).toBeInTheDocument()
   })
 
@@ -30,7 +31,7 @@ describe('DashboardPage', () => {
       json: async () => ({ site: null }),
     } as Response)
 
-    render(<DashboardPage user={mockUser} onLogout={vi.fn()} />)
+    render(<MemoryRouter><DashboardPage user={mockUser} onLogout={vi.fn()} /></MemoryRouter>)
 
     await waitFor(() => {
       expect(screen.getByText(/Crie seu site agora/i)).toBeInTheDocument()
@@ -43,7 +44,7 @@ describe('DashboardPage', () => {
       json: async () => ({ site: null }),
     } as Response)
 
-    render(<DashboardPage user={mockUser} onLogout={vi.fn()} />)
+    render(<MemoryRouter><DashboardPage user={mockUser} onLogout={vi.fn()} /></MemoryRouter>)
 
     await waitFor(() => {
       expect(screen.getByText(/Faça upgrade para o Plano Start/i)).toBeInTheDocument()
@@ -56,7 +57,7 @@ describe('DashboardPage', () => {
       json: async () => ({ site: null }),
     } as Response)
 
-    render(<DashboardPage user={{ ...mockUser, plan: 'start' }} onLogout={vi.fn()} />)
+    render(<MemoryRouter><DashboardPage user={{ ...mockUser, plan: 'start' }} onLogout={vi.fn()} /></MemoryRouter>)
 
     await waitFor(() => {
       expect(screen.queryByText(/Faça upgrade para o Plano Start/i)).not.toBeInTheDocument()
@@ -81,7 +82,7 @@ describe('DashboardPage', () => {
       json: async () => ({ site: mockSite }),
     } as Response)
 
-    render(<DashboardPage user={mockUser} onLogout={vi.fn()} />)
+    render(<MemoryRouter><DashboardPage user={mockUser} onLogout={vi.fn()} /></MemoryRouter>)
 
     await waitFor(() => {
       expect(screen.getByText('Barbearia do João')).toBeInTheDocument()
@@ -107,7 +108,7 @@ describe('DashboardPage', () => {
       json: async () => ({ site: mockSite }),
     } as Response)
 
-    render(<DashboardPage user={mockUser} onLogout={vi.fn()} />)
+    render(<MemoryRouter><DashboardPage user={mockUser} onLogout={vi.fn()} /></MemoryRouter>)
 
     // Wait for "Meu Site" nav button to appear (after site loads) then click
     const meuSiteBtn = await screen.findByRole('button', { name: /Meu Site/i })
@@ -127,7 +128,7 @@ describe('DashboardPage', () => {
       json: async () => ({ site: null }),
     } as Response)
 
-    render(<DashboardPage user={mockUser} onLogout={vi.fn()} />)
+    render(<MemoryRouter><DashboardPage user={mockUser} onLogout={vi.fn()} /></MemoryRouter>)
     expect(screen.getByText('Dashboard')).toBeInTheDocument()
     expect(screen.getByText('Minha Logo')).toBeInTheDocument()
   })
