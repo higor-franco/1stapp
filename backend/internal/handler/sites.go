@@ -147,6 +147,8 @@ func (h *Handler) handleGenerateSite(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
+		// Save version before regenerating
+		h.saveVersion(r.Context(), existingSite)
 		// Update existing site
 		site, err = h.db.UpdateSiteGeneration(r.Context(), db.UpdateSiteGenerationParams{
 			UserID:              user.ID,
@@ -327,4 +329,156 @@ func hexVal(c byte) byte {
 	default:
 		return 255
 	}
+}
+
+// ── saveVersion saves the current HTML as a version snapshot ─────────────────
+
+func (h *Handler) saveVersion(ctx context.Context, site db.Site) {
+	if site.HtmlContent == "" {
+		return
+	}
+	_, err := h.db.CreateSiteVersion(ctx, db.CreateSiteVersionParams{
+		SiteID:      site.ID,
+		HtmlContent: site.HtmlContent,
+	})
+	if err != nil {
+		slog.Warn("save version failed", "err", err)
+		return
+	}
+	_ = h.db.TrimSiteVersions(ctx, site.ID)
+}
+
+// ── POST /api/sites/edit — alter site via prompt ──────────────────────────────
+
+type editSiteReq struct {
+	Instruction string `json:"instruction"`
+}
+
+func (h *Handler) handleEditSite(w http.ResponseWriter, r *http.Request) {
+	user := userFromCtx(r)
+
+	if user.Plan != "start" {
+		writeJSON(w, http.StatusPaymentRequired, map[string]string{"error": "requer Plano Start"})
+		return
+	}
+
+	var req editSiteReq
+	if err := readJSON(r, &req); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "requisição inválida"})
+		return
+	}
+	req.Instruction = strings.TrimSpace(req.Instruction)
+	if req.Instruction == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "instrução não pode ser vazia"})
+		return
+	}
+
+	site, err := h.db.GetSiteByUserID(r.Context(), user.ID)
+	if err != nil {
+		writeJSON(w, http.StatusNotFound, map[string]string{"error": "site não encontrado"})
+		return
+	}
+
+	if h.cfg.GeminiAPIKey == "" {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "GEMINI_API_KEY não configurado"})
+		return
+	}
+
+	// Save version before editing
+	h.saveVersion(r.Context(), site)
+
+	gemini := newGeminiClient(h.cfg.GeminiAPIKey)
+	newHTML, err := gemini.editSite(r.Context(), site.HtmlContent, req.Instruction)
+	if err != nil {
+		slog.Error("gemini edit error", "err", err)
+		writeJSON(w, http.StatusBadGateway, map[string]string{"error": "erro ao editar site com IA. Tente novamente."})
+		return
+	}
+
+	updated, err := h.db.UpdateSiteContent(r.Context(), db.UpdateSiteContentParams{
+		ID:          site.ID,
+		HtmlContent: newHTML,
+		Published:   site.Published,
+	})
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "erro ao salvar"})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"site": toSiteResponse(updated)})
+}
+
+// ── GET /api/sites/versions — list last 5 versions ───────────────────────────
+
+type versionItem struct {
+	ID         string `json:"id"`
+	VersionNum int32  `json:"version_num"`
+	CreatedAt  string `json:"created_at"`
+}
+
+func (h *Handler) handleGetSiteVersions(w http.ResponseWriter, r *http.Request) {
+	user := userFromCtx(r)
+
+	site, err := h.db.GetSiteByUserID(r.Context(), user.ID)
+	if err != nil {
+		writeJSON(w, http.StatusOK, []versionItem{})
+		return
+	}
+
+	rows, err := h.db.GetSiteVersionsBySiteID(r.Context(), site.ID)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "erro interno"})
+		return
+	}
+
+	items := make([]versionItem, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, versionItem{
+			ID:         uuidToString(row.ID),
+			VersionNum: row.VersionNum,
+			CreatedAt:  row.CreatedAt.Time.Format("02/01/2006 15:04"),
+		})
+	}
+	writeJSON(w, http.StatusOK, items)
+}
+
+// ── POST /api/sites/versions/{id}/restore ────────────────────────────────────
+
+func (h *Handler) handleRestoreVersion(w http.ResponseWriter, r *http.Request) {
+	user := userFromCtx(r)
+
+	versionID, err := parsePgtypeUUID(strings.ReplaceAll(r.PathValue("id"), "-", ""))
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "id inválido"})
+		return
+	}
+
+	site, err := h.db.GetSiteByUserID(r.Context(), user.ID)
+	if err != nil {
+		writeJSON(w, http.StatusNotFound, map[string]string{"error": "site não encontrado"})
+		return
+	}
+
+	htmlContent, err := h.db.GetSiteVersionHTML(r.Context(), db.GetSiteVersionHTMLParams{
+		ID:     versionID,
+		SiteID: site.ID,
+	})
+	if err != nil {
+		writeJSON(w, http.StatusNotFound, map[string]string{"error": "versão não encontrada"})
+		return
+	}
+
+	// Save current as version before restoring
+	h.saveVersion(r.Context(), site)
+
+	updated, err := h.db.UpdateSiteHTMLOnly(r.Context(), db.UpdateSiteHTMLOnlyParams{
+		ID:          site.ID,
+		HtmlContent: htmlContent,
+	})
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "erro ao restaurar"})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"site": toSiteResponse(updated)})
 }

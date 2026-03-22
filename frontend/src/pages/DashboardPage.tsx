@@ -307,6 +307,7 @@ export default function DashboardPage({ user, onLogout, onUserUpdate: _onUserUpd
           site && site.html_content ? (
             <SiteManagement
               site={site}
+              userPlan={user.plan}
               onSiteUpdate={setSite}
               onRegenerate={() => setSite(null)}
             />
@@ -358,18 +359,28 @@ export default function DashboardPage({ user, onLogout, onUserUpdate: _onUserUpd
 }
 
 // ---- Site Management (existing site) ----
+interface VersionItem { id: string; version_num: number; created_at: string }
+
 function SiteManagement({
   site,
+  userPlan,
   onSiteUpdate,
   onRegenerate,
 }: {
   site: Site
+  userPlan: string
   onSiteUpdate: (s: Site) => void
   onRegenerate: () => void
 }) {
   const [previewOpen, setPreviewOpen] = useState(true)
   const [publishing, setPublishing] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [instruction, setInstruction] = useState('')
+  const [editing, setEditing] = useState(false)
+  const [editError, setEditError] = useState('')
+  const [versions, setVersions] = useState<VersionItem[]>([])
+  const [versionsOpen, setVersionsOpen] = useState(false)
+  const [restoring, setRestoring] = useState<string | null>(null)
 
   async function togglePublish() {
     setPublishing(true)
@@ -390,6 +401,47 @@ function SiteManagement({
     navigator.clipboard.writeText(`${window.location.origin}${site.url}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  async function handleEdit(e: React.FormEvent) {
+    e.preventDefault()
+    setEditError('')
+    setEditing(true)
+    try {
+      const r = await fetch('/api/sites/edit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ instruction }),
+      })
+      const data = await r.json()
+      if (!r.ok) { setEditError(data.error || 'Erro ao editar'); return }
+      onSiteUpdate(data.site)
+      setInstruction('')
+    } catch {
+      setEditError('Erro de conexão')
+    } finally {
+      setEditing(false)
+    }
+  }
+
+  async function loadVersions() {
+    if (versionsOpen) { setVersionsOpen(false); return }
+    const r = await fetch('/api/sites/versions')
+    const data = await r.json()
+    setVersions(data ?? [])
+    setVersionsOpen(true)
+  }
+
+  async function restoreVersion(id: string) {
+    if (!confirm('Restaurar esta versão? A versão atual será salva no histórico.')) return
+    setRestoring(id)
+    try {
+      const r = await fetch(`/api/sites/versions/${id}/restore`, { method: 'POST' })
+      const data = await r.json()
+      if (r.ok) { onSiteUpdate(data.site); setVersionsOpen(false) }
+    } finally {
+      setRestoring(null)
+    }
   }
 
   return (
@@ -440,6 +492,42 @@ function SiteManagement({
         </div>
       )}
 
+      {/* Edit via prompt (Plano Start) */}
+      {userPlan === 'start' ? (
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-6">
+          <h3 className="font-semibold text-gray-900 mb-1 flex items-center gap-2">
+            <Bot className="w-4 h-4 text-blue-600" />
+            Alterar site via prompt
+          </h3>
+          <p className="text-xs text-gray-500 mb-3">Descreva a mudança em linguagem natural e a IA aplica no seu site.</p>
+          <form onSubmit={handleEdit} className="flex gap-2">
+            <input
+              value={instruction}
+              onChange={e => setInstruction(e.target.value)}
+              placeholder='Ex: "Adicione uma seção de depoimentos" ou "Mude as cores para azul escuro"'
+              required
+              className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="submit"
+              disabled={editing}
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-semibold px-5 py-2.5 rounded-xl whitespace-nowrap"
+            >
+              {editing ? 'Editando...' : 'Aplicar'}
+            </button>
+          </form>
+          {editError && <p className="text-sm text-red-600 mt-2">{editError}</p>}
+        </div>
+      ) : (
+        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-6 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-blue-900">Altere o site via prompt com o Plano Start</p>
+            <p className="text-xs text-blue-700 mt-0.5">Descreva a mudança em português e a IA aplica automaticamente.</p>
+          </div>
+          <a href="/upgrade" className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shrink-0">Fazer upgrade</a>
+        </div>
+      )}
+
       {/* Preview */}
       <div className="rounded-2xl overflow-hidden border-2 border-gray-200 shadow-lg mb-6">
         <div className="bg-gray-100 px-4 py-3 flex items-center gap-3 border-b border-gray-200">
@@ -463,6 +551,43 @@ function SiteManagement({
             style={{ height: '65vh', border: 'none' }}
             title="Preview do site"
           />
+        )}
+      </div>
+
+      {/* Version history */}
+      <div className="bg-white border border-gray-200 rounded-2xl mb-6 overflow-hidden">
+        <button
+          onClick={loadVersions}
+          className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+        >
+          <span className="flex items-center gap-2">
+            <FileText className="w-4 h-4 text-gray-400" />
+            Histórico de versões
+          </span>
+          <span className="text-gray-400 text-xs">{versionsOpen ? '▲ Ocultar' : '▼ Ver versões'}</span>
+        </button>
+        {versionsOpen && (
+          <div className="border-t border-gray-100 divide-y divide-gray-50">
+            {versions.length === 0 ? (
+              <p className="text-sm text-gray-400 px-5 py-4">Nenhuma versão salva ainda. As versões são criadas automaticamente ao editar ou regenerar o site.</p>
+            ) : (
+              versions.map(v => (
+                <div key={v.id} className="flex items-center justify-between px-5 py-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">Versão {v.version_num}</p>
+                    <p className="text-xs text-gray-400">{v.created_at}</p>
+                  </div>
+                  <button
+                    onClick={() => restoreVersion(v.id)}
+                    disabled={restoring === v.id}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    {restoring === v.id ? 'Restaurando...' : 'Restaurar'}
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         )}
       </div>
 

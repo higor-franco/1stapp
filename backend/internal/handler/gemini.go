@@ -110,6 +110,75 @@ func (c *geminiClient) generateSite(ctx context.Context, businessName, descripti
 	return html, nil
 }
 
+func (c *geminiClient) editSite(ctx context.Context, currentHTML, instruction string) (string, error) {
+	// Truncate HTML to avoid exceeding token limits (~50k chars ≈ ~12k tokens)
+	if len(currentHTML) > 50000 {
+		currentHTML = currentHTML[:50000] + "\n<!-- truncado -->"
+	}
+
+	prompt := fmt.Sprintf(`Você é um desenvolvedor web especialista. Abaixo está o HTML completo de um site existente.
+
+## Instrução do usuário:
+%s
+
+## HTML atual do site:
+%s
+
+## Regras obrigatórias:
+- Aplique APENAS a instrução solicitada, preservando todo o restante do site intacto
+- Mantenha o mesmo estilo visual, cores e estrutura
+- Retorne APENAS o HTML completo atualizado, iniciando com <!DOCTYPE html> e terminando com </html>
+- Zero texto explicativo antes ou depois do HTML`,
+		instruction, currentHTML)
+
+	reqBody := geminiReqBody{
+		Contents: []geminiContent{
+			{Parts: []geminiPart{{Text: prompt}}},
+		},
+		GenerationConfig: geminiGenerationConfig{
+			Temperature:     0.3,
+			MaxOutputTokens: 8192,
+		},
+	}
+
+	body, err := json.Marshal(reqBody)
+	if err != nil {
+		return "", fmt.Errorf("marshal request: %w", err)
+	}
+
+	url := fmt.Sprintf("%s?key=%s", geminiEndpoint, c.apiKey)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
+	if err != nil {
+		return "", fmt.Errorf("create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("gemini request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("read response: %w", err)
+	}
+
+	var gemResp geminiResponse
+	if err := json.Unmarshal(respBytes, &gemResp); err != nil {
+		return "", fmt.Errorf("parse response: %w", err)
+	}
+	if gemResp.Error != nil {
+		return "", fmt.Errorf("gemini error: %s", gemResp.Error.Message)
+	}
+	if len(gemResp.Candidates) == 0 || len(gemResp.Candidates[0].Content.Parts) == 0 {
+		return "", fmt.Errorf("resposta vazia do Gemini")
+	}
+
+	html := gemResp.Candidates[0].Content.Parts[0].Text
+	return extractHTML(html), nil
+}
+
 // extractHTML strips markdown code fences if Gemini wraps the output
 func extractHTML(s string) string {
 	s = strings.TrimSpace(s)

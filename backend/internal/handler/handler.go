@@ -48,6 +48,9 @@ func (h *Handler) Routes() http.Handler {
 	mux.HandleFunc("POST /api/sites/generate", h.requireAuth(h.handleGenerateSite))
 	mux.HandleFunc("PUT /api/sites/publish", h.requireAuth(h.handlePublishSite))
 	mux.HandleFunc("GET /api/sites/preview", h.requireAuth(h.handlePreviewSite))
+	mux.HandleFunc("POST /api/sites/edit", h.requireAuth(h.handleEditSite))
+	mux.HandleFunc("GET /api/sites/versions", h.requireAuth(h.handleGetSiteVersions))
+	mux.HandleFunc("POST /api/sites/versions/{id}/restore", h.requireAuth(h.handleRestoreVersion))
 
 	// Logos
 	mux.HandleFunc("GET /api/logos/me", h.requireAuth(h.handleGetMyLogo))

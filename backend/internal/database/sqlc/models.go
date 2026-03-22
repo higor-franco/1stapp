@@ -98,6 +98,14 @@ type Site struct {
 	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
 }
 
+type SiteVersion struct {
+	ID          pgtype.UUID        `json:"id"`
+	SiteID      pgtype.UUID        `json:"site_id"`
+	VersionNum  int32              `json:"version_num"`
+	HtmlContent string             `json:"html_content"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
 type Subscription struct {
 	ID                  pgtype.UUID        `json:"id"`
 	UserID              pgtype.UUID        `json:"user_id"`

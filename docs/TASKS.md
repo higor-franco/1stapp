@@ -74,15 +74,15 @@
 
 | Tarefa | Status | Notas |
 |--------|--------|-------|
-| Dashboard principal | Pendente | Resumo do site, status, plano atual, etapas do onboarding |
-| Seção "Meu Site" — alteração via prompt | Pendente | Instrução em linguagem natural → Gemini regenera → preview → publicar |
-| Histórico de versões do site (últimas 5) | Pendente | Possibilidade de restaurar versão anterior |
-| Seção "Minha Logo" | Pendente | Visualizar logos, baixar SVG, gerar nova |
-| Seção "Página Bio" — edição de links | Pendente | WhatsApp, redes sociais, preview |
-| Seção "Atendimento" — gerenciar Octadesk | Pendente | Atualizar widget, número de WhatsApp |
-| Seção "Pagamentos" — gerenciar Vindi | Pendente | Conexão, produtos, ativar/desativar botão no site |
-| Seção "Domínio" | Pendente | Status, instruções DNS, verificação de propagação |
-| Seção "Assinatura" | Pendente | Plano atual, histórico de faturas, cancelamento |
+| Dashboard principal | Done | Resumo do site, status, plano atual, banner onboarding dismissível |
+| Seção "Meu Site" — alteração via prompt | Done | POST /api/sites/edit → Gemini aplica instrução → preview atualizado |
+| Histórico de versões do site (últimas 5) | Done | GET /api/sites/versions + POST /api/sites/versions/{id}/restore; salvo automático antes de cada geração/edição |
+| Seção "Minha Logo" | Done | LogoPage.tsx: visualizar, gerar, selecionar logo |
+| Seção "Página Bio" — edição de links | Done | BioConfigPage.tsx: WhatsApp, redes sociais, preview iframe |
+| Seção "Atendimento" — gerenciar Octadesk | Done | OctadeskPage.tsx: widget code, número WhatsApp, toggle |
+| Seção "Pagamentos" — gerenciar Vindi | Done | PaymentAddonPage.tsx: API key, produto, ativar/desativar botão no site |
+| Seção "Domínio" | Done | DomainPage.tsx: 4-step flow, DNS table, verificação de propagação |
+| Seção "Assinatura" | Done | SubscriptionPage.tsx: plano, histórico de faturas, cancelamento |
 
 ## Fase 10 — Performance SEO e Presença em LLMs
 

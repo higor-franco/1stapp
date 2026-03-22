@@ -42,6 +42,11 @@ UPDATE sites SET custom_domain = $2, updated_at = NOW()
 WHERE id = $1
 RETURNING *;
 
+-- name: UpdateSiteHTMLOnly :one
+UPDATE sites SET html_content = $2, updated_at = NOW()
+WHERE id = $1
+RETURNING *;
+
 -- name: GetSiteByCustomDomain :one
 SELECT * FROM sites WHERE custom_domain = $1 AND published = true LIMIT 1;
 
