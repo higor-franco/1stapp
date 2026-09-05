@@ -1,0 +1,40 @@
+# Inventário da conta CloudStack. SÓ LISTA — não cria, não apaga, não altera.
+#
+# Existe porque as credenciais da Locaweb vivem apenas como GitHub Secrets, que
+# não podem ser lidas de volta: consultar a conta exige rodar de dentro do
+# Actions. Disparo manual.
+name: Inventario
+
+on:
+  workflow_dispatch:
+
+jobs:
+  inventario:
+    runs-on: ubuntu-latest
+    steps:
+      - name: CloudMonkey
+        env:
+          CLOUDSTACK_API_KEY: ${{ secrets.CLOUDSTACK_API_KEY }}
+          CLOUDSTACK_SECRET_KEY: ${{ secrets.CLOUDSTACK_SECRET_KEY }}
+        run: |
+          wget -q https://github.com/apache/cloudstack-cloudmonkey/releases/latest/download/cmk.linux.x86-64
+          chmod +x cmk.linux.x86-64 && sudo mv cmk.linux.x86-64 /usr/local/bin/cmk
+          cmk set url "https://painel-cloud.locaweb.com.br/client/api"
+          cmk set apikey "$CLOUDSTACK_API_KEY"
+          cmk set secretkey "$CLOUDSTACK_SECRET_KEY"
+          cmk set output json
+          cmk sync
+      - name: Inventario
+        run: |
+          cmk list networks > redes.json || echo '{}' > redes.json
+          jq -r '(.network // [])[] | "REDE \(.name) | estado=\(.state)"' redes.json
+          cmk list virtualmachines listall=true > vms.json || echo '{}' > vms.json
+          jq -r '(.virtualmachine // [])[] as $v | ($v.nic // [])[]
+                 | "VM \($v.name) | rede=\(.networkname // "?") | estado=\($v.state) | criada=\($v.created)"' vms.json
+          cmk list volumes type=DATADISK listall=true > vols.json || echo '{}' > vols.json
+          jq -r '(.volume // [])[] | "DISCO \(.name) | estado=\(.state)"' vols.json
+          cmk list snapshots listall=true > snaps.json || echo '{}' > snaps.json
+          echo "SNAPSHOTS_TOTAL: $(jq '.snapshot | length // 0' snaps.json)"
+          jq -r '(.snapshot // []) | group_by(.volumename)[] | "SNAPGRUPO \(.[0].volumename) => \(length)"' snaps.json
+          cmk list publicipaddresses listall=true > ips.json || echo '{}' > ips.json
+          jq -r '(.publicipaddress // [])[] | "IP \(.ipaddress) | rede=\(.associatednetworkname // "sem rede") | vm=\(.virtualmachinename // "-")"' ips.json
