@@ -1,0 +1,40 @@
+# TEMPORÁRIO — só lista. Não cria, não apaga, não altera nada.
+name: Inventario
+
+on:
+  workflow_dispatch:
+
+jobs:
+  inventario:
+    runs-on: ubuntu-latest
+    steps:
+      - name: CloudMonkey
+        env:
+          CLOUDSTACK_API_KEY: ${{ secrets.CLOUDSTACK_API_KEY }}
+          CLOUDSTACK_SECRET_KEY: ${{ secrets.CLOUDSTACK_SECRET_KEY }}
+        run: |
+          wget -q https://github.com/apache/cloudstack-cloudmonkey/releases/latest/download/cmk.linux.x86-64
+          chmod +x cmk.linux.x86-64 && sudo mv cmk.linux.x86-64 /usr/local/bin/cmk
+          cmk set url "https://painel-cloud.locaweb.com.br/client/api"
+          cmk set apikey "$CLOUDSTACK_API_KEY"
+          cmk set secretkey "$CLOUDSTACK_SECRET_KEY"
+          cmk set output json
+          cmk sync
+
+      - name: Redes
+        run: |
+          cmk list networks > redes.json || echo '{}' > redes.json
+          jq -r '(.network // [])[] | "REDE \(.name) | id=\(.id) | estado=\(.state) | zona=\(.zonename // "?")"' redes.json
+
+      - name: Maquinas virtuais
+        run: |
+          cmk list virtualmachines listall=true > vms.json || echo '{}' > vms.json
+          jq -r '(.virtualmachine // [])[]
+                 | "VM \(.name) | estado=\(.state) | criada=\(.created) | modelo=\(.serviceofferingname // "?") | imagem=\(.templatename // "?")"' vms.json
+          echo "--- redes de cada VM ---"
+          jq -r '(.virtualmachine // [])[] as $v
+                 | ($v.nic // [])[]
+                 | "NIC \($v.name) | rede=\(.networkname // "?") | ip_interno=\(.ipaddress // "?")"' vms.json
+          echo "--- IPs publicos ---"
+          cmk list publicipaddresses listall=true > ips.json || echo '{}' > ips.json
+          jq -r '(.publicipaddress // [])[] | "IP \(.ipaddress) | rede=\(.associatednetworkname // "sem rede") | vm=\(.virtualmachinename // "-")"' ips.json
