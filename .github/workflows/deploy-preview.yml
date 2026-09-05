@@ -1,9 +1,19 @@
 # .github/workflows/deploy-preview.yml
 name: Deploy Preview
+#
+# Disparo MANUAL desde 05/09/2026, quando o projeto foi desligado.
+#
+# Antes, este workflow subia a cada push no master. Isso é razoável enquanto o
+# projeto está vivo, e uma armadilha depois que ele é desmobilizado: o commit que
+# documentava a derrubada reconstruiu o ambiente derrubado quinze minutos antes,
+# com discos em branco e IPs novos. Ninguém pediu esse deploy — ele veio de
+# carona num commit de documentação.
+#
+# Com `workflow_dispatch`, subir o ambiente volta a ser um ato deliberado. Para
+# recuperar os dados junto, é preciso `recover: true` no bloco `with:` do job de
+# infra — sem ele os discos vêm vazios.
 on:
-  push:
-    branches: [master]
-    paths-ignore: [".claude/**"]
+  workflow_dispatch:
 
 permissions:
   contents: read
