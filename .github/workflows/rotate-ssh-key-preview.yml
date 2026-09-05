@@ -1,0 +1,25 @@
+# Rotação da chave SSH do ambiente preview.
+#
+# A chave antiga só existia dentro dos GitHub Secrets — de onde não pode ser
+# lida de volta — e não havia cópia no disco de ninguém. Rotacionar era o único
+# jeito de recuperar acesso às VMs.
+#
+# O workflow para cada VM, troca a chave pela API da CloudStack e religa
+# (acessórios primeiro, web por último, para encurtar a queda visível).
+name: Rotate SSH Key Preview
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rotate:
+    uses: gmautner/locaweb-cloud-provision/.github/workflows/rotate-ssh-key.yml@v1
+    with:
+      env_name: "preview"
+    secrets:
+      CLOUDSTACK_API_KEY: ${{ secrets.CLOUDSTACK_API_KEY }}
+      CLOUDSTACK_SECRET_KEY: ${{ secrets.CLOUDSTACK_SECRET_KEY }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
